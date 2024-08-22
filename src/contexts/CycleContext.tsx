@@ -1,4 +1,5 @@
-import { useReducer, useState } from 'react'
+import { differenceInSeconds } from 'date-fns'
+import { useEffect, useReducer, useState } from 'react'
 import { toast } from 'react-toastify'
 
 import {
@@ -32,13 +33,34 @@ interface CycleProviderProps {
 }
 
 export function CycleContextProvider({ children }: CycleProviderProps) {
-  const [cyclesState, dispatchCycles] = useReducer(CyclesReducer, initialState)
-
-  const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
+  const [cyclesState, dispatchCycles] = useReducer(
+    CyclesReducer,
+    initialState,
+    (initialState) => {
+      const stateJSON = localStorage.getItem('@ignite-timer:cycles-state-1.0.0')
+      if (stateJSON) {
+        return JSON.parse(stateJSON)
+      }
+      return initialState
+    },
+  )
 
   const { cycles, activeCycleId } = cyclesState
-
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState(() => {
+    if (activeCycle) {
+      return differenceInSeconds(new Date(), new Date(activeCycle.startedAt))
+    }
+
+    return 0
+  })
+
+  useEffect(() => {
+    const stateJSON = JSON.stringify(cyclesState)
+
+    localStorage.setItem('@ignite-timer:cycles-state-1.0.0', stateJSON)
+  }, [cyclesState])
 
   /**
    * Atualiza a quantidade de segundos passados desde o início do ciclo ativo.

@@ -8,5 +8,10 @@ export const Page404Container = styled.main`
   align-items: center;
   justify-content: center;
 
-  margin: 20% auto;
+  margin: 15% auto;
+
+  p {
+    color: ${({ theme }) => theme['gray-400']};
+    margin-top: 1rem;
+  }
 `
